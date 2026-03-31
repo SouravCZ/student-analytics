@@ -64,10 +64,10 @@ export default function Attendance() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">📅 Attendance</h1>
+<div style={{ display: 'flex', minHeight: '100vh', background: '#f7f8fa' }}>
+  <Sidebar />
+  <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.5px', marginBottom: '24px' }}>📅 Attendance</h1>
 
         {/* Tabs */}
         <div className="flex gap-4 mb-6">

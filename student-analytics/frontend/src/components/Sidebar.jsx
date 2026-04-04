@@ -6,6 +6,7 @@ const navItems = [
   { label: 'Students', path: '/students', icon: '◉' },
   { label: 'Attendance', path: '/attendance', icon: '◫' },
   { label: 'Performance', path: '/performance', icon: '◈' },
+  { label: 'Alerts', path: '/alerts', icon: '🔔' },
   { label: 'Reports', path: '/reports', icon: '◧' },
 ];
 

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Suspense, lazy } from 'react';
 
@@ -8,6 +8,7 @@ const Attendance = lazy(() => import('./pages/Attendance'));
 const Performance = lazy(() => import('./pages/Performance'));
 const Students = lazy(() => import('./pages/Students'));
 const Reports = lazy(() => import('./pages/Reports'));
+const Alerts = lazy(() => import('./pages/Alerts'));
 
 const Loader = () => (
   <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: '#f7f8fa' }}>
@@ -34,6 +35,7 @@ function AppRoutes() {
         <Route path="/performance" element={<PrivateRoute><Performance /></PrivateRoute>} />
         <Route path="/students" element={<PrivateRoute><Students /></PrivateRoute>} />
         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
+        <Route path="/alerts" element={<PrivateRoute><Alerts /></PrivateRoute>} />
       </Routes>
     </Suspense>
   );

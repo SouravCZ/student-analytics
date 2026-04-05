@@ -9,6 +9,8 @@ const Performance = lazy(() => import('./pages/Performance'));
 const Students = lazy(() => import('./pages/Students'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Alerts = lazy(() => import('./pages/Alerts'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
 
 const Loader = () => (
   <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: '#f7f8fa' }}>
@@ -36,6 +38,8 @@ function AppRoutes() {
         <Route path="/students" element={<PrivateRoute><Students /></PrivateRoute>} />
         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
         <Route path="/alerts" element={<PrivateRoute><Alerts /></PrivateRoute>} />
+        <Route path="*" element={<NotFound />} />
+        <Route path="/student-dashboard" element={<PrivateRoute><StudentDashboard /></PrivateRoute>} />
       </Routes>
     </Suspense>
   );

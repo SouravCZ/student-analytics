@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = 'student_analytics_secret_key_2024';
 
-// Register
+const Student = require('../models/student');
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -15,9 +16,19 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role });
-    await user.save();
 
+    // Try to find matching student profile by email
+    const studentProfile = await Student.findOne({ email });
+
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      linkedStudentId: studentProfile?._id || null
+    });
+
+    await user.save();
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

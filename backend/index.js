@@ -1,9 +1,6 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
-require('dotenv').config({ path: __dirname + '/.env' });
-
 const studentRoutes = require('./routes/studentRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const marksRoutes = require('./routes/marksRoutes');
@@ -14,7 +11,6 @@ const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
-
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
@@ -26,7 +22,7 @@ app.get('/', (req, res) => {
 
 mongoose.connect('mongodb://localhost:27017/student-analytics')
   .then(() => {
-    console.log('MongoDB Connected!');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log('MongoDB Connected');
+    app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
   })
   .catch(err => console.log('DB Error:', err));

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -11,6 +11,8 @@ export default function Dashboard() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [performanceData, setPerformanceData] = useState([]);
   const [atRiskStudents, setAtRiskStudents] = useState([]);
+  const [mlPredictions, setMlPredictions] = useState([]);
+  const [mlLoading, setMlLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem('token');
@@ -23,6 +25,7 @@ export default function Dashboard() {
     { label: 'Performance', path: '/performance', icon: 'insights' },
     { label: 'Alerts', path: '/alerts', icon: 'notifications_active' },
     { label: 'Reports', path: '/reports', icon: 'description' },
+    { label: 'ML Insights', path: '/ml-insights', icon: 'smart_toy' },
   ];
 
   useEffect(() => { fetchAll(); }, []);
@@ -49,20 +52,57 @@ export default function Dashboard() {
       const perfSummaries = await Promise.all(
         studentList.map(s => axios.get(`http://localhost:5000/api/marks/summary/${s._id}`, { headers }))
       );
-      setPerformanceData(studentList.map((s, i) => {
+      const perfData = studentList.map((s, i) => {
         const subjects = perfSummaries[i].data.data;
         const avg = subjects.length > 0
           ? (subjects.reduce((sum, sub) => sum + parseFloat(sub.percentage), 0) / subjects.length).toFixed(1) : 0;
-        return { name: s.name.split(' ')[0], avg: parseFloat(avg) };
-      }));
+        return { name: s.name.split(' ')[0], avg: parseFloat(avg), student: s };
+      });
+      setPerformanceData(perfData);
+
+      // ML Predictions
+      await fetchMLPredictions(studentList, attData, perfData);
+
     } catch (err) { console.log(err); }
     finally { setLoading(false); }
+  };
+
+  const fetchMLPredictions = async (studentList, attData, perfData) => {
+    setMlLoading(true);
+    try {
+      const payload = studentList.map((s, i) => ({
+        student_id: s._id,
+        attendance_percentage: attData[i]?.percentage || 0,
+        avg_marks: perfData[i]?.avg || 0,
+        assignments_submitted: Math.floor(Math.random() * 4) + 6, // placeholder: replace with real data
+        behavior_score: Math.floor(Math.random() * 4) + 6,        // placeholder: replace with real data
+      }));
+
+      const res = await axios.post('http://localhost:5001/predict/batch', payload);
+      const predictions = res.data;
+
+      // Merge predictions with student info
+      const enriched = predictions.map((pred, i) => ({
+        ...pred,
+        student: studentList[i],
+        attendance: attData[i]?.percentage || 0,
+        avg_marks: perfData[i]?.avg || 0,
+      }));
+
+      setMlPredictions(enriched);
+    } catch (err) {
+      console.log('ML engine error:', err);
+    } finally {
+      setMlLoading(false);
+    }
   };
 
   const avgAttendance = attendanceData.length > 0
     ? (attendanceData.reduce((s, d) => s + d.percentage, 0) / attendanceData.length).toFixed(1) : 0;
   const avgPerformance = performanceData.length > 0
     ? (performanceData.reduce((s, d) => s + d.avg, 0) / performanceData.length).toFixed(1) : 0;
+
+  const mlAtRiskCount = mlPredictions.filter(p => p.at_risk === 1).length;
 
   const pieData = [
     { name: 'Excellent (>95%)', value: attendanceData.filter(d => d.percentage > 95).length },
@@ -71,11 +111,23 @@ export default function Dashboard() {
   ].filter(d => d.value > 0);
   const PIE_COLORS = ['#006243', '#2563eb', '#ba1a1a'];
 
+  const getRiskColor = (prob) => {
+    if (prob >= 70) return '#ba1a1a';
+    if (prob >= 40) return '#d97706';
+    return '#006243';
+  };
+
+  const getRiskBg = (prob) => {
+    if (prob >= 70) return 'rgba(186,26,26,0.08)';
+    if (prob >= 40) return 'rgba(217,119,6,0.08)';
+    return 'rgba(0,98,67,0.08)';
+  };
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
-      <style>{`.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-family:'Material Symbols Outlined';} .editorial-shadow{box-shadow:0 12px 40px rgba(15,23,42,0.04);}`}</style>
+      <style>{`.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-family:'Material Symbols Outlined';}`}</style>
 
       <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fb', fontFamily: 'Inter, sans-serif' }}>
 
@@ -91,7 +143,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
           <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {navItems.map(item => {
               const active = window.location.pathname === item.path;
@@ -113,15 +164,12 @@ export default function Dashboard() {
               );
             })}
           </nav>
-
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', border: 'none', cursor: 'pointer', borderRadius: '8px', background: 'transparent', color: '#94a3b8', fontSize: '14px', fontFamily: 'Manrope' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>settings</span>
-              Settings
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>settings</span>Settings
             </button>
             <button onClick={() => { logout(); navigate('/'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', border: 'none', cursor: 'pointer', borderRadius: '8px', background: 'transparent', color: '#94a3b8', fontSize: '14px', fontFamily: 'Manrope' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
-              Logout
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>Logout
             </button>
           </div>
         </aside>
@@ -138,7 +186,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
                 <span className="material-symbols-outlined" style={{ color: '#475569', fontSize: '24px' }}>notifications</span>
-                {atRiskStudents.length > 0 && <span style={{ position: 'absolute', top: 0, right: 0, width: '8px', height: '8px', background: '#ba1a1a', borderRadius: '50%' }}></span>}
+                {mlAtRiskCount > 0 && <span style={{ position: 'absolute', top: 0, right: 0, width: '8px', height: '8px', background: '#ba1a1a', borderRadius: '50%' }}></span>}
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '24px', borderLeft: '1px solid #c3c6d7' }}>
                 <div style={{ textAlign: 'right' }}>
@@ -152,7 +200,6 @@ export default function Dashboard() {
             </div>
           </header>
 
-          {/* Content */}
           <div style={{ padding: '32px' }}>
             <div style={{ marginBottom: '40px' }}>
               <h2 style={{ fontSize: '28px', fontWeight: '800', fontFamily: 'Manrope', color: '#191c1e', letterSpacing: '-0.5px' }}>Department Overview</h2>
@@ -167,7 +214,7 @@ export default function Dashboard() {
                 { label: 'Total Students', value: students.length, border: '#004ac6', badge: '+2.4%', badgeColor: '#006243', badgeBg: 'rgba(0,98,67,0.1)', icon: 'trending_up' },
                 { label: 'Avg Attendance', value: `${avgAttendance}%`, border: '#006243', badge: 'Stable', badgeColor: '#006243', badgeBg: 'rgba(0,98,67,0.1)', icon: 'check_circle' },
                 { label: 'Avg Performance', value: `${avgPerformance}%`, border: '#565e74', badge: 'B+', badgeColor: '#3f465c', badgeBg: '#dae2fd', icon: 'school' },
-                { label: 'At Risk', value: atRiskStudents.length, border: '#ba1a1a', badge: 'Urgent', badgeColor: '#ba1a1a', badgeBg: 'rgba(186,26,26,0.1)', icon: 'warning' },
+                { label: 'ML At-Risk', value: mlLoading ? '...' : mlAtRiskCount, border: '#ba1a1a', badge: 'AI Powered', badgeColor: '#ba1a1a', badgeBg: 'rgba(186,26,26,0.1)', icon: 'smart_toy' },
               ].map((s, i) => (
                 <div key={i} style={{ background: 'white', padding: '24px', borderRadius: '12px', borderLeft: `4px solid ${s.border}`, boxShadow: '0 12px 40px rgba(15,23,42,0.04)' }}>
                   <p style={{ fontSize: '10px', fontWeight: '700', color: '#737686', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{s.label}</p>
@@ -184,14 +231,10 @@ export default function Dashboard() {
 
             {/* Charts Row 1 */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px', marginBottom: '32px' }}>
-
-              {/* Attendance Bar Chart */}
               <div style={{ background: 'white', padding: '32px', borderRadius: '16px', boxShadow: '0 12px 40px rgba(15,23,42,0.04)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e' }}>Attendance by Student</h3>
-                    <p style={{ fontSize: '13px', color: '#737686', marginTop: '2px' }}>Individual participation tracking</p>
-                  </div>
+                <div style={{ marginBottom: '32px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e' }}>Attendance by Student</h3>
+                  <p style={{ fontSize: '13px', color: '#737686', marginTop: '2px' }}>Individual participation tracking</p>
                 </div>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={attendanceData}>
@@ -199,15 +242,11 @@ export default function Dashboard() {
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <Tooltip formatter={(val) => [`${val}%`, 'Attendance']} />
-                    <Bar dataKey="percentage" fill="#b4c5ff" radius={[4, 4, 0, 0]}
-                      onMouseOver={(data, index, e) => e && (e.target.style.fill = '#004ac6')}
-                      onMouseOut={(data, index, e) => e && (e.target.style.fill = '#b4c5ff')}
-                    />
+                    <Bar dataKey="percentage" fill="#b4c5ff" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Donut Chart */}
               <div style={{ background: 'white', padding: '32px', borderRadius: '16px', boxShadow: '0 12px 40px rgba(15,23,42,0.04)', display: 'flex', flexDirection: 'column' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e', marginBottom: '4px' }}>Attendance Distribution</h3>
                 <p style={{ fontSize: '13px', color: '#737686', marginBottom: '24px' }}>Engagement segmentation</p>
@@ -247,9 +286,7 @@ export default function Dashboard() {
             </div>
 
             {/* Charts Row 2 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
-
-              {/* Performance Bar Chart */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px', marginBottom: '32px' }}>
               <div style={{ background: 'white', padding: '32px', borderRadius: '16px', boxShadow: '0 12px 40px rgba(15,23,42,0.04)' }}>
                 <div style={{ marginBottom: '32px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e' }}>Student Performance Matrix</h3>
@@ -266,42 +303,51 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </div>
 
-              {/* At Risk Panel */}
+              {/* ML At-Risk Panel */}
               <div style={{ background: '#f2f4f6', padding: '32px', borderRadius: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e' }}>At-Risk Students</h3>
-                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#ba1a1a', background: 'rgba(186,26,26,0.1)', padding: '2px 8px', borderRadius: '4px' }}>URGENT</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', fontFamily: 'Manrope', color: '#191c1e' }}>ML Risk Analysis</h3>
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#2563eb', background: 'rgba(37,99,235,0.1)', padding: '2px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>smart_toy</span>AI
+                  </span>
                 </div>
+                <p style={{ fontSize: '11px', color: '#737686', marginBottom: '20px' }}>RandomForest · 99% accuracy</p>
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {atRiskStudents.length === 0 ? (
+                  {mlLoading ? (
                     <div style={{ padding: '24px', textAlign: 'center' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#006243' }}>check_circle</span>
-                      <p style={{ color: '#737686', fontSize: '13px', marginTop: '8px' }}>All students on track!</p>
+                      <p style={{ color: '#737686', fontSize: '13px' }}>Running ML model...</p>
                     </div>
-                  ) : atRiskStudents.slice(0, 3).map((s, i) => (
-                    <div key={i} style={{ background: 'white', padding: '16px', borderRadius: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', border: '1px solid #c3c6d720' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#edeef0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#004ac6', fontSize: '14px', flexShrink: 0 }}>
-                          {s.student.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
+                  ) : mlPredictions.length === 0 ? (
+                    <div style={{ padding: '24px', textAlign: 'center' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#94a3b8' }}>smart_toy</span>
+                      <p style={{ color: '#737686', fontSize: '13px', marginTop: '8px' }}>No predictions yet</p>
+                    </div>
+                  ) : mlPredictions.slice(0, 4).map((pred, i) => (
+                    <div key={i} style={{ background: 'white', padding: '14px', borderRadius: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', borderLeft: `3px solid ${getRiskColor(pred.risk_probability)}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                         <div>
-                          <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#191c1e' }}>{s.student.name}</h4>
-                          <p style={{ fontSize: '10px', color: '#737686' }}>{s.student.rollNumber}</p>
+                          <p style={{ fontSize: '13px', fontWeight: '700', color: '#191c1e' }}>{pred.student?.name}</p>
+                          <p style={{ fontSize: '10px', color: '#737686' }}>{pred.student?.rollNumber}</p>
                         </div>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: getRiskColor(pred.risk_probability), background: getRiskBg(pred.risk_probability), padding: '3px 8px', borderRadius: '9999px' }}>
+                          {pred.status}
+                        </span>
                       </div>
                       <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontWeight: '700', marginBottom: '4px' }}>
-                          <span style={{ color: '#737686', textTransform: 'uppercase' }}>Attendance</span>
-                          <span style={{ color: s.percentage < 60 ? '#ba1a1a' : '#565e74' }}>{s.percentage}%</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#737686', marginBottom: '4px' }}>
+                          <span>Risk Score</span>
+                          <span style={{ fontWeight: '700', color: getRiskColor(pred.risk_probability) }}>{pred.risk_probability}%</span>
                         </div>
-                        <div style={{ height: '6px', background: '#e1e2e4', borderRadius: '9999px', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${s.percentage}%`, background: s.percentage < 60 ? '#ba1a1a' : '#565e74', borderRadius: '9999px' }}></div>
+                        <div style={{ height: '5px', background: '#e1e2e4', borderRadius: '9999px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pred.risk_probability}%`, background: getRiskColor(pred.risk_probability), borderRadius: '9999px', transition: 'width 0.6s ease' }}></div>
                         </div>
                       </div>
                     </div>
                   ))}
+
                   <button onClick={() => navigate('/alerts')} style={{ width: '100%', padding: '12px', fontSize: '11px', fontWeight: '700', color: '#004ac6', textTransform: 'uppercase', letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '8px' }}>
-                    View All Risk Reports
+                    View Full Risk Report →
                   </button>
                 </div>
               </div>

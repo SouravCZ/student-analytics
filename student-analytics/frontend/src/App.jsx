@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Suspense, lazy } from 'react';
+import MLInsights from "./pages/MLInsights";
+
 
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -40,6 +42,7 @@ function AppRoutes() {
         <Route path="/alerts" element={<PrivateRoute><Alerts /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
         <Route path="/student-dashboard" element={<PrivateRoute><StudentDashboard /></PrivateRoute>} />
+        <Route path="/ml-insights" element={<PrivateRoute><MLInsights /></PrivateRoute>} />
       </Routes>
     </Suspense>
   );

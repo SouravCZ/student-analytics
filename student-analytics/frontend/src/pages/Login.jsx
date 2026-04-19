@@ -22,10 +22,10 @@ export default function Login() {
         const res = await axios.post('https://student-analytics-10eb.onrender.com/api/auth/login', { email: form.email, password: form.password });
         if (res.data.success) {
           login(res.data.user, res.data.token);
-          navigate(res.data.user.role === 'Admin' ? '/dashboard' : '/student-dashboard');
+          navigate(res.data.user.role === 'admin' || role === 'Admin' ? '/dashboard' : '/student-dashboard');
         }
       } else {
-        if (role === 'Admin' && !form.department) return setError('Please select your department!');
+        if (role === 'admin' || role === 'Admin' && !form.department) return setError('Please select your department!');
         if (!form.name || !form.email || !form.password) return setError('Please fill all fields!');
         await axios.post('https://student-analytics-10eb.onrender.com/api/auth/register', {
           name: form.name, email: form.email, password: form.password,
@@ -212,7 +212,7 @@ export default function Login() {
                   </div>
 
                   {/* Department — HOD only */}
-                  {tab === 'register' && role === 'Admin' && (
+                  {tab === 'register' && role === 'admin' || role === 'Admin' && (
                     <div>
                       <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#737686', display: 'block', marginBottom: '8px' }}>Department</label>
                       <select
@@ -249,3 +249,4 @@ export default function Login() {
     </>
   );
 }
+

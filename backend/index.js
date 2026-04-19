@@ -7,9 +7,10 @@ const marksRoutes = require('./routes/marksRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/student-analytics';
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
@@ -20,7 +21,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Student Analytics Backend is running!' });
 });
 
-mongoose.connect('mongodb://localhost:27017/student-analytics')
+mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('MongoDB Connected');
     app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

@@ -154,24 +154,6 @@ export default function Login() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-                  {/* Role selector */}
-                  {tab === 'register' && (
-                    <div>
-                      <p style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#737686', marginBottom: '8px' }}>Account Role</p>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        {['Student', 'Admin'].map(r => (
-                          <button key={r} onClick={() => setRole(r)} style={{
-                            padding: '12px', border: `1.5px solid ${role === r ? '#004ac6' : '#c3c6d7'}`,
-                            borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '600',
-                            background: role === r ? 'rgba(0,74,198,0.05)' : 'white',
-                            color: role === r ? '#004ac6' : '#191c1e',
-                            transition: 'all 0.2s'
-                          }}>{r === 'Admin' ? 'HOD / Admin' : 'Student'}</button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Name field */}
                   {tab === 'register' && (
                     <div>
@@ -249,4 +231,5 @@ export default function Login() {
     </>
   );
 }
+
 

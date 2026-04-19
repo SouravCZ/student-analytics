@@ -28,14 +28,14 @@ export default function Students() {
   useEffect(() => { fetchStudents(); }, []);
 
   const fetchStudents = async () => {
-    const res = await axios.get('http://localhost:5000/api/students', { headers });
+    const res = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
     setStudents(res.data.data.filter(s => !user.department || s.department === user.department));
   };
 
   const handleAdd = async () => {
     if (!form.studentId || !form.name || !form.email || !form.rollNumber || !form.department) return setMessage('Fill all required fields!');
     try {
-      await axios.post('http://localhost:5000/api/students', form, { headers });
+      await axios.post('https://student-analytics-10eb.onrender.com/api/students', form, { headers });
       setMessage('Student added!'); setShowModal(false);
       setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
       fetchStudents();
@@ -45,7 +45,7 @@ export default function Students() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this student?')) return;
-    await axios.delete(`http://localhost:5000/api/students/${id}`, { headers });
+    await axios.delete(`https://student-analytics-10eb.onrender.com/api/students/${id}`, { headers });
     fetchStudents();
   };
 

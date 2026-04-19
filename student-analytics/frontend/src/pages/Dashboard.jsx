@@ -32,14 +32,14 @@ export default function Dashboard() {
 
   const fetchAll = async () => {
     try {
-      const studentsRes = await axios.get('http://localhost:5000/api/students', { headers });
+      const studentsRes = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
       const studentList = studentsRes.data.data.filter(s =>
         !user.department || s.department === user.department
       );
       setStudents(studentList);
 
       const attendanceSummaries = await Promise.all(
-        studentList.map(s => axios.get(`http://localhost:5000/api/attendance/summary/${s._id}`, { headers }))
+        studentList.map(s => axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${s._id}`, { headers }))
       );
       const attData = studentList.map((s, i) => ({
         name: s.name.split(' ')[0],
@@ -50,7 +50,7 @@ export default function Dashboard() {
       setAtRiskStudents(attData.filter(d => d.percentage < 75));
 
       const perfSummaries = await Promise.all(
-        studentList.map(s => axios.get(`http://localhost:5000/api/marks/summary/${s._id}`, { headers }))
+        studentList.map(s => axios.get(`https://student-analytics-10eb.onrender.com/api/marks/summary/${s._id}`, { headers }))
       );
       const perfData = studentList.map((s, i) => {
         const subjects = perfSummaries[i].data.data;
@@ -78,7 +78,7 @@ export default function Dashboard() {
         behavior_score: Math.floor(Math.random() * 4) + 6,        // placeholder: replace with real data
       }));
 
-      const res = await axios.post('http://localhost:5001/predict/batch', payload);
+      const res = await axios.post('https://student-analytics-ds.onrender.com/predict/batch', payload);
       const predictions = res.data;
 
       // Merge predictions with student info

@@ -19,7 +19,7 @@ export default function Login() {
     setLoading(true); setError(''); setSuccess('');
     try {
       if (tab === 'login') {
-        const res = await axios.post('http://localhost:5000/api/auth/login', { email: form.email, password: form.password });
+        const res = await axios.post('https://student-analytics-10eb.onrender.com/api/auth/login', { email: form.email, password: form.password });
         if (res.data.success) {
           login(res.data.user, res.data.token);
           navigate(res.data.user.role === 'Admin' ? '/dashboard' : '/student-dashboard');
@@ -27,7 +27,7 @@ export default function Login() {
       } else {
         if (role === 'Admin' && !form.department) return setError('Please select your department!');
         if (!form.name || !form.email || !form.password) return setError('Please fill all fields!');
-        await axios.post('http://localhost:5000/api/auth/register', {
+        await axios.post('https://student-analytics-10eb.onrender.com/api/auth/register', {
           name: form.name, email: form.email, password: form.password,
           role, department: form.department
         });

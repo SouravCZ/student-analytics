@@ -4,7 +4,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from "recharts";
 
-const DS_URL = "http://localhost:5001";
+const DS_URL = "https://student-analytics-ds.onrender.com";
 
 const sampleStudents = [
   { student_id: "STU001", name: "Rahul Sharma", attendance_percentage: 55, avg_marks: 38, assignments_submitted: 3, behavior_score: 5 },

@@ -31,7 +31,7 @@ export default function Attendance() {
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/students', { headers });
+      const res = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
       const studentList = res.data.data.filter(s => !user.department || s.department === user.department);
       setStudents(studentList);
       const initial = {};
@@ -43,7 +43,7 @@ export default function Attendance() {
   const fetchSummary = async () => {
     try {
       const summaries = await Promise.all(
-        students.map(s => axios.get(`http://localhost:5000/api/attendance/summary/${s._id}`, { headers }))
+        students.map(s => axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${s._id}`, { headers }))
       );
       setSummary(students.map((s, i) => ({
         name: s.name, rollNumber: s.rollNumber,
@@ -57,7 +57,7 @@ export default function Attendance() {
     setLoading(true);
     try {
       await Promise.all(
-        students.map(s => axios.post('http://localhost:5000/api/attendance', {
+        students.map(s => axios.post('https://student-analytics-10eb.onrender.com/api/attendance', {
           studentId: s._id, subject, date, status: attendance[s._id] || 'Present'
         }, { headers }))
       );

@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
-const DS_URL = "http://localhost:5001";
+const DS_URL = "https://student-analytics-ds.onrender.com";
 const sampleStudents = [
   { student_id: "STU001", name: "Rahul Sharma", attendance_percentage: 55, avg_marks: 38, assignments_submitted: 3, behavior_score: 5 },
   { student_id: "STU002", name: "Priya Das", attendance_percentage: 88, avg_marks: 76, assignments_submitted: 9, behavior_score: 8 },
@@ -172,3 +172,4 @@ export default function MLInsights() {
     </>
   );
 }
+

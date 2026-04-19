@@ -17,14 +17,14 @@ export default function Alerts() {
 
   const fetchAlerts = async () => {
     try {
-      const studentsRes = await axios.get('http://localhost:5000/api/students', { headers });
+      const studentsRes = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
       const studentList = studentsRes.data.data;
 
       const results = await Promise.all(
         studentList.map(async (s) => {
           const [attRes, perfRes] = await Promise.all([
-            axios.get(`http://localhost:5000/api/attendance/summary/${s._id}`, { headers }),
-            axios.get(`http://localhost:5000/api/marks/summary/${s._id}`, { headers })
+            axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${s._id}`, { headers }),
+            axios.get(`https://student-analytics-10eb.onrender.com/api/marks/summary/${s._id}`, { headers })
           ]);
           const attendance = parseFloat(attRes.data.data.percentage) || 0;
           const subjects = perfRes.data.data;

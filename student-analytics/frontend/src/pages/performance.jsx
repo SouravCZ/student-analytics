@@ -33,7 +33,7 @@ export default function Performance() {
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/students', { headers });
+      const res = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
       const list = res.data.data.filter(s => !user.department || s.department === user.department);
       setStudents(list);
       if (list.length > 0) selectStudent(list[0]);
@@ -45,9 +45,9 @@ export default function Performance() {
     setMarks([]); setSummary([]); setAttendance(null);
     try {
       const [marksRes, summaryRes, attRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/marks/student/${student._id}`, { headers }),
-        axios.get(`http://localhost:5000/api/marks/summary/${student._id}`, { headers }),
-        axios.get(`http://localhost:5000/api/attendance/summary/${student._id}`, { headers }),
+        axios.get(`https://student-analytics-10eb.onrender.com/api/marks/student/${student._id}`, { headers }),
+        axios.get(`https://student-analytics-10eb.onrender.com/api/marks/summary/${student._id}`, { headers }),
+        axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${student._id}`, { headers }),
       ]);
       setMarks(marksRes.data.data);
       setSummary(summaryRes.data.data);
@@ -59,7 +59,7 @@ export default function Performance() {
     if (!selected || !form.subject || !form.marksObtained || !form.totalMarks) return setMessage('Please fill all fields!');
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/marks', {
+      await axios.post('https://student-analytics-10eb.onrender.com/api/marks', {
         studentId: selected._id, ...form,
         marksObtained: Number(form.marksObtained),
         totalMarks: Number(form.totalMarks)

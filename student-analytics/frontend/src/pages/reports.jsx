@@ -24,7 +24,7 @@ export default function Reports() {
   ];
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/students', { headers })
+    axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers })
       .then(res => setStudents(res.data.data.filter(s => !user.department || s.department === user.department)));
   }, []);
 
@@ -32,8 +32,8 @@ export default function Reports() {
     setSelected(student); setLoading(true);
     try {
       const [attRes, perfRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/attendance/summary/${student._id}`, { headers }),
-        axios.get(`http://localhost:5000/api/marks/summary/${student._id}`, { headers })
+        axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${student._id}`, { headers }),
+        axios.get(`https://student-analytics-10eb.onrender.com/api/marks/summary/${student._id}`, { headers })
       ]);
       setReport({ attendance: attRes.data.data, performance: perfRes.data.data });
     } catch (err) { console.log(err); }

@@ -20,14 +20,14 @@ export default function StudentDashboard() {
 
   const findStudent = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/students', { headers });
+      const res = await axios.get('https://student-analytics-10eb.onrender.com/api/students', { headers });
       const match = res.data.data.find(s => s.email === user?.email);
       if (match) {
         setStudentId(match._id);
         const [attRes, marksRes, summaryRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/attendance/summary/${match._id}`, { headers }),
-          axios.get(`http://localhost:5000/api/marks/student/${match._id}`, { headers }),
-          axios.get(`http://localhost:5000/api/marks/summary/${match._id}`, { headers })
+          axios.get(`https://student-analytics-10eb.onrender.com/api/attendance/summary/${match._id}`, { headers }),
+          axios.get(`https://student-analytics-10eb.onrender.com/api/marks/student/${match._id}`, { headers }),
+          axios.get(`https://student-analytics-10eb.onrender.com/api/marks/summary/${match._id}`, { headers })
         ]);
         setAttendance(attRes.data.data);
         setMarks(marksRes.data.data);

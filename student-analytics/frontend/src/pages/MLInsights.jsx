@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const DS_URL = "https://student-analytics-ds.onrender.com";
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://student-analytics-10eb.onrender.com/api";
 const COLORS = ["#ef4444", "#22c55e"];
 
 export default function MLInsights() {

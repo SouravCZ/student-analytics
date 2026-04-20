@@ -1,86 +1,74 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: '▣' },
-  { label: 'Students', path: '/students', icon: '◉' },
-  { label: 'Attendance', path: '/attendance', icon: '◫' },
-  { label: 'Performance', path: '/performance', icon: '◈' },
-  { label: 'Alerts', path: '/alerts', icon: '🔔' },
-  { label: 'Reports', path: '/reports', icon: '◧' },
+  { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
+  { label: "Students", path: "/students", icon: "group" },
+  { label: "Attendance", path: "/attendance", icon: "calendar_today" },
+  { label: "Performance", path: "/performance", icon: "insights" },
+  { label: "Alerts", path: "/alerts", icon: "notifications_active" },
+  { label: "Reports", path: "/reports", icon: "description" },
+  { label: "ML Insights", path: "/ml-insights", icon: "smart_toy" },
 ];
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => { logout(); navigate('/'); };
-
   return (
-    <div style={{
-      width: '220px', minHeight: '100vh', background: '#0f172a',
-      display: 'flex', flexDirection: 'column', flexShrink: 0,
-      borderRight: '1px solid #1e293b'
+    <aside style={{
+      width: "256px", height: "100vh", position: "fixed", left: 0, top: 0,
+      background: "#131B2E", display: "flex", flexDirection: "column",
+      padding: "24px", gap: "8px", zIndex: 50
     }}>
-      {/* Logo */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e293b' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '28px', height: '28px', background: '#2563eb', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: 'white', fontSize: '14px' }}>◈</span>
+      <div style={{ marginBottom: "32px", padding: "0 8px" }}>
+        <h1 style={{ color: "white", fontSize: "18px", fontWeight: "700", fontFamily: "Manrope", letterSpacing: "-0.3px" }}>
+          Academic Portal
+        </h1>
+        <p style={{ color: "#94a3b8", fontSize: "12px", marginTop: "4px" }}>HOD Dashboard</p>
+        {user?.department && (
+          <div style={{ marginTop: "12px", background: "rgba(37,99,235,0.15)", borderRadius: "8px", padding: "8px 10px" }}>
+            <p style={{ color: "#60a5fa", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em" }}>Department</p>
+            <p style={{ color: "white", fontSize: "13px", fontWeight: "600", marginTop: "2px" }}>{user.department}</p>
           </div>
-          <span style={{ color: 'white', fontWeight: '600', fontSize: '14px', letterSpacing: '-0.3px' }}>StudentAnalytics</span>
-        </div>
+        )}
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <p style={{ color: '#475569', fontSize: '11px', fontWeight: '600', letterSpacing: '0.8px', padding: '0 8px', marginBottom: '8px', textTransform: 'uppercase' }}>Menu</p>
+      <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
         {navItems.map(item => {
-          const active = location.pathname === item.path;
+          const active = window.location.pathname === item.path;
           return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              style={{
-                width: '100%', textAlign: 'left', padding: '9px 12px',
-                borderRadius: '8px', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '10px',
-                background: active ? '#1e3a5f' : 'transparent',
-                color: active ? '#60a5fa' : '#94a3b8',
-                fontSize: '13.5px', fontWeight: active ? '600' : '400',
-                transition: 'all 0.15s'
-              }}
-              onMouseOver={e => !active && (e.currentTarget.style.background = '#1e293b')}
-              onMouseOut={e => !active && (e.currentTarget.style.background = 'transparent')}
+            <button key={item.path} onClick={() => navigate(item.path)} style={{
+              width: "100%", display: "flex", alignItems: "center", gap: "12px",
+              padding: "12px 16px", border: "none", cursor: "pointer", borderRadius: "8px",
+              background: active ? "rgba(255,255,255,0.1)" : "transparent",
+              color: active ? "white" : "#94a3b8",
+              fontSize: "14px", fontWeight: active ? "600" : "400",
+              fontFamily: "Manrope", textAlign: "left", transition: "all 0.2s"
+            }}
+              onMouseOver={e => !active && (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+              onMouseOut={e => !active && (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ fontSize: '13px' }}>{item.icon}</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>{item.icon}</span>
               {item.label}
-              {active && <span style={{ marginLeft: 'auto', width: '5px', height: '5px', borderRadius: '50%', background: '#2563eb' }}></span>}
             </button>
           );
         })}
       </nav>
 
-      {/* User */}
-      <div style={{ padding: '16px 12px', borderTop: '1px solid #1e293b' }}>
-        <div style={{ padding: '10px 12px', background: '#1e293b', borderRadius: '8px', marginBottom: '8px' }}>
-          <div style={{ color: 'white', fontSize: '13px', fontWeight: '500' }}>{user?.name}</div>
-          <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>{user?.role}</div>
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div style={{ padding: "8px 16px", marginBottom: "4px" }}>
+          <p style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>{user?.name}</p>
+          <p style={{ color: "#60a5fa", fontSize: "11px", marginTop: "2px" }}>{user?.role?.toUpperCase()}</p>
         </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            width: '100%', padding: '8px', background: 'transparent',
-            color: '#ef4444', border: '1px solid #1e293b', borderRadius: '8px',
-            fontSize: '13px', cursor: 'pointer', fontWeight: '500', transition: 'all 0.15s'
-          }}
-          onMouseOver={e => { e.currentTarget.style.background = '#450a0a'; e.currentTarget.style.borderColor = '#ef4444'; }}
-          onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#1e293b'; }}
-        >
-          Sign out
+        <button onClick={() => { logout(); navigate("/"); }} style={{
+          width: "100%", display: "flex", alignItems: "center", gap: "12px",
+          padding: "12px 16px", border: "none", cursor: "pointer", borderRadius: "8px",
+          background: "transparent", color: "#94a3b8", fontSize: "14px", fontFamily: "Manrope"
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>logout</span>Logout
         </button>
       </div>
-    </div>
+    </aside>
   );
 }

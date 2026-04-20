@@ -38,9 +38,10 @@ export default function MLInsights() {
 
       // 1. Get all students
       const studRes = await fetch(`${API_URL}/students`, { headers });
-      const students = await studRes.json();
+      const json = await studRes.json();
+const students = json.data || [];
 
-      if (!Array.isArray(students) || students.length === 0) {
+if (!Array.isArray(students) || students.length === 0) {
         setFetchError("No students found in the database. Please register students first.");
         setLoading(false);
         return;

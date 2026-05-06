@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const DEPARTMENTS = ['Computer Science', 'Electronics', 'Mechanical', 'Civil', 'Physics', 'Mathematics', 'Chemistry'];
-const API = 'https://student-analytics-10eb.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Students() {
   const { user, logout } = useAuth();
@@ -46,15 +46,19 @@ export default function Students() {
   };
 
   const handleAdd = async () => {
-    if (!form.studentId || !form.name || !form.email || !form.rollNumber || !form.department) return setMessage('Fill all required fields!');
+    if (!form.studentId || !form.name || !form.email || !form.rollNumber || !form.department)
+      return setMessage('Fill all required fields!');
     try {
+      setMessage('Adding student, please wait...');
       await axios.post(`${API}/api/students`, form, { headers });
       setMessage('Student added successfully!');
       setShowModal(false);
       setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
-      fetchStudents();
+      await fetchStudents();
       setTimeout(() => setMessage(''), 3000);
-    } catch (err) { setMessage(err.response?.data?.message || 'Error adding student!'); }
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Error adding student!');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -154,7 +158,7 @@ export default function Students() {
             </div>
 
             {message && (
-              <div style={{ padding: '12px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', background: message.includes('Error') || message.includes('Fill') ? '#fef2f2' : '#f0fdf4', color: message.includes('Error') || message.includes('Fill') ? '#dc2626' : '#16a34a', border: `1px solid ${message.includes('Error') || message.includes('Fill') ? '#fca5a5' : '#86efac'}` }}>
+              <div style={{ padding: '12px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', background: message.includes('Error') || message.includes('Fill') ? '#fef2f2' : message.includes('wait') ? '#fffbeb' : '#f0fdf4', color: message.includes('Error') || message.includes('Fill') ? '#dc2626' : message.includes('wait') ? '#d97706' : '#16a34a', border: `1px solid ${message.includes('Error') || message.includes('Fill') ? '#fca5a5' : message.includes('wait') ? '#fcd34d' : '#86efac'}` }}>
                 {message}
               </div>
             )}
@@ -387,7 +391,7 @@ export default function Students() {
                     </select>
                   </div>
                 </div>
-                {message && <div style={{ marginTop: '16px', padding: '10px 14px', borderRadius: '8px', fontSize: '13px', background: '#fef2f2', color: '#dc2626', fontWeight: '600' }}>{message}</div>}
+                {message && <div style={{ marginTop: '16px', padding: '10px 14px', borderRadius: '8px', fontSize: '13px', background: message.includes('wait') ? '#fffbeb' : '#fef2f2', color: message.includes('wait') ? '#d97706' : '#dc2626', fontWeight: '600' }}>{message}</div>}
               </div>
               <div style={{ padding: '16px 32px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                 <button onClick={() => setShowModal(false)} style={{ padding: '12px 24px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontWeight: '700', fontSize: '13px', color: '#475569' }}>Cancel</button>

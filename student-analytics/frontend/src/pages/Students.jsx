@@ -51,12 +51,12 @@ export default function Students() {
     try {
       setMessage('Adding student, please wait...');
       await axios.post(`${API}/api/students`, form, { headers });
-      setMessage('Student added successfully!');
-      setShowModal(false);
-      setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
-      setTimeout(() => fetchStudents(), 1000);
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
+      const res = await axios.post(`${API}/api/students`, form, { headers });
+setStudents(prev => [...prev, res.data.data]);
+setMessage('Student added successfully!');
+setShowModal(false);
+setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
+setTimeout(() => setMessage(''), 3000);    } catch (err) {
       setMessage(err.response?.data?.message || 'Error adding student!');
     }
   };

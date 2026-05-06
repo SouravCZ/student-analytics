@@ -46,20 +46,21 @@ export default function Students() {
   };
 
   const handleAdd = async () => {
-    if (!form.studentId || !form.name || !form.email || !form.rollNumber || !form.department)
-      return setMessage('Fill all required fields!');
-    try {
-      setMessage('Adding student, please wait...');
-      await axios.post(`${API}/api/students`, form, { headers });
-      const res = await axios.post(`${API}/api/students`, form, { headers });
-setStudents(prev => [...prev, res.data.data]);
-setMessage('Student added successfully!');
-setShowModal(false);
-setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
-setTimeout(() => setMessage(''), 3000);    } catch (err) {
-      setMessage(err.response?.data?.message || 'Error adding student!');
-    }
-  };
+  if (!form.studentId || !form.name || !form.email || !form.rollNumber || !form.department)
+    return setMessage('Fill all required fields!');
+  try {
+    setMessage('Adding student, please wait...');
+    const res = await axios.post(`${API}/api/students`, form, { headers });
+    const newStudent = res.data.data;
+    setStudents(prev => [...prev, newStudent]);
+    setShowModal(false);
+    setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
+    setMessage('Student added successfully!');
+    setTimeout(() => setMessage(''), 3000);
+  } catch (err) {
+    setMessage(err.response?.data?.message || 'Error adding student!');
+  }
+};
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this student?')) return;

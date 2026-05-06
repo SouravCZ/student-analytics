@@ -54,7 +54,7 @@ export default function Students() {
       setMessage('Student added successfully!');
       setShowModal(false);
       setForm({ studentId: '', name: '', email: '', rollNumber: '', department: user?.department || '', semester: 1, section: '', phone: '' });
-      await fetchStudents();
+      setTimeout(() => fetchStudents(), 1000);
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Error adding student!');
